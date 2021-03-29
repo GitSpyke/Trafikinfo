@@ -1,34 +1,56 @@
-import React, { Component } from 'react';
-import { Route } from 'react-router';
-import { Layout } from './components/Layout';
-import { Home } from './components/Home';
-import { FetchData } from './components/FetchData';
-import { Counter } from './components/Counter';
-import './custom.css'
-//OpenLayers
-import Map from 'ol/Map';
-import View from 'ol/View';
-import TileLayer from 'ol/layer/Tile';
-import XYZ from 'ol/source/XYZ';
+import './App.css';
 
+// react
+import React, { useState, useEffect } from 'react';
 
+// openlayers
+import GeoJSON from 'ol/format/GeoJSON'
+import Feature from 'ol/Feature';
 
+// components
+import MapWrapper from './components/MapWrapper'
 
-export default class App extends Component {
-  static displayName = App.name;
+function App() {
 
-  render () {
+    // set intial state
+    const [features, setFeatures] = useState([])
+
+    // initialization - retrieve GeoJSON features from Mock JSON API get features from mock 
+    //  GeoJson API (read from flat .json file in public directory)
+    useEffect(() => {
+
+        fetch('/mock-geojson-api.json')
+            .then(response => response.json())
+            .then((fetchedFeatures) => {
+
+                // parse fetched geojson into OpenLayers features
+                //  use options to convert feature from EPSG:4326 to EPSG:3857
+                const wktOptions = {
+                    dataProjection: 'EPSG:4326',
+                    featureProjection: 'EPSG:3857'
+                }
+                const parsedFeatures = new GeoJSON().readFeatures(fetchedFeatures, wktOptions)
+
+                // set features into state (which will be passed into OpenLayers
+                //  map component as props)
+                setFeatures(parsedFeatures)
+
+            })
+
+    }, [])
+
     return (
-      <Layout>
-        <Route exact path='/' component={Home} />
-        <Route path='/counter' component={Counter} />
-        <Route path='/fetch-data' component={FetchData} />
-        <Map />
-      </Layout>
-    );
-    }
+        <div className="App">
+
+            <div className="app-label">
+                <p>React Functional Components with OpenLayers Example</p>
+                <p>Click the map to reveal location coordinate via React State</p>
+            </div>
+
+            <MapWrapper features={features} />
+
+        </div>
+    )
 }
 
-
-
-
+export default App
