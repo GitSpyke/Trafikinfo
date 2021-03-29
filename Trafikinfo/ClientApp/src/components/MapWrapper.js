@@ -1,4 +1,4 @@
-// react
+﻿// react
 import React, { useState, useEffect, useRef } from 'react';
 
 // openlayers
@@ -10,8 +10,18 @@ import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import { transform } from 'ol/proj'
 import { toStringXY } from 'ol/coordinate';
+import Feature from 'ol/Feature';
+import { circular } from 'ol/geom/Polygon';
+import Point from 'ol/geom/Point';
+import Control from 'ol/control/Control';
+import { fromLonLat } from 'ol/proj';
 
 function MapWrapper(props) {
+
+    const source = new VectorSource();
+    const layer = new VectorLayer({
+        source: source
+    });
 
     // set intial state
     const [map, setMap] = useState()
@@ -60,10 +70,12 @@ function MapWrapper(props) {
             view: new View({
                 projection: 'EPSG:3857',
                 center: [0, 0],
-                zoom: 2
+                zoom: 8
             }),
             controls: []
         })
+
+        initialMap.addLayer(layer);
 
         // set map onclick handler
         initialMap.on('click', handleMapClick)
@@ -71,6 +83,33 @@ function MapWrapper(props) {
         // save map and vector layer references to state
         setMap(initialMap)
         setFeaturesLayer(initalFeaturesLayer)
+
+        navigator.geolocation.watchPosition(function (pos) {
+            const coords = [pos.coords.longitude, pos.coords.latitude];
+            const accuracy = circular(coords, pos.coords.accuracy);
+            source.clear(true);
+            source.addFeatures([
+                new Feature(accuracy.transform('EPSG:4326', initialMap.getView().getProjection())),
+                new Feature(new Point(fromLonLat(coords)))
+            ]);
+        }, function (error) {
+            alert(`ERROR: ${error.message}`);
+        }, {
+            enableHighAccuracy: true
+        });
+
+        //const locate = document.createElement('div');
+        //locate.className = 'ol-control ol-unselectable locate';
+        //locate.innerHTML = '<button title="Locate me">◎</button>';
+        //locate.addEventListener('click', function () {
+        //    if (!source.isEmpty()) {
+        //        initialMap.getView().fit(source.getExtent(), {
+        //            maxZoom: 18,
+        //            duration: 500
+        //        });
+        //    }
+        //});
+
 
     }, [])
 
@@ -110,6 +149,7 @@ function MapWrapper(props) {
 
     }
 
+    
     // render component
     return (
         <div>

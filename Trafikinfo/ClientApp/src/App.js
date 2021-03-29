@@ -1,4 +1,4 @@
-import './App.css';
+﻿import './App.css';
 
 // react
 import React, { useState, useEffect } from 'react';
@@ -46,6 +46,8 @@ function App() {
                 <p>React Functional Components with OpenLayers Example</p>
                 <p>Click the map to reveal location coordinate via React State</p>
             </div>
+            {/*<div class='ol-control ol-unselectable locate'></div>*/}
+            {/*<button title="Locate me">◎</button>;*/}
 
             <MapWrapper features={features} />
 

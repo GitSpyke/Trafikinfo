@@ -12,3 +12,8 @@ code {
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
+
+.locate {
+    top: 6em;
+    left: .5em;
+}

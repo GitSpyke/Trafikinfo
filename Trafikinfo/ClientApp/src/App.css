@@ -33,3 +33,8 @@
 .clicked-coord-label p {
   margin: 10px;
 }
+
+.locate {
+    top: 6em;
+    left: .5em;
+}
