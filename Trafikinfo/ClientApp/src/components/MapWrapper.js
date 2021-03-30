@@ -13,7 +13,6 @@ import { toStringXY } from 'ol/coordinate';
 import Feature from 'ol/Feature';
 import { circular } from 'ol/geom/Polygon';
 import Point from 'ol/geom/Point';
-import Control from 'ol/control/Control';
 import { fromLonLat } from 'ol/proj';
 
 function MapWrapper(props) {
@@ -75,18 +74,16 @@ function MapWrapper(props) {
             controls: []
         })
 
+
         initialMap.addLayer(layer);
 
         // set map onclick handler
         initialMap.on('click', handleMapClick)
 
-        // save map and vector layer references to state
-        setMap(initialMap)
-        setFeaturesLayer(initalFeaturesLayer)
-
         navigator.geolocation.watchPosition(function (pos) {
             const coords = [pos.coords.longitude, pos.coords.latitude];
             const accuracy = circular(coords, pos.coords.accuracy);
+            initialMap.getView().setCenter(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'));
             source.clear(true);
             source.addFeatures([
                 new Feature(accuracy.transform('EPSG:4326', initialMap.getView().getProjection())),
@@ -97,6 +94,11 @@ function MapWrapper(props) {
         }, {
             enableHighAccuracy: true
         });
+
+        // save map and vector layer references to state
+        setMap(initialMap)
+        setFeaturesLayer(initalFeaturesLayer)
+
 
         //const locate = document.createElement('div');
         //locate.className = 'ol-control ol-unselectable locate';
