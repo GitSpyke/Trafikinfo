@@ -17,3 +17,9 @@ code {
     top: 6em;
     left: .5em;
 }
+
+.departures {
+    background-color: red;
+    width: 100vw;
+    height: 100vh;
+}

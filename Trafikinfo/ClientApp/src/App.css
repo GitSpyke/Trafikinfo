@@ -34,7 +34,13 @@
   margin: 10px;
 }
 
-.locate {
+/*.locate {
     top: 6em;
     left: .5em;
 }
+
+.departures {
+    background-color: red;
+    width: 100vw;
+    height: 100vh;
+}*/

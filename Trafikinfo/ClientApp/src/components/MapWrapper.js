@@ -9,15 +9,16 @@ import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
 import { transform } from 'ol/proj'
-import { toStringXY } from 'ol/coordinate';
-import Feature from 'ol/Feature';
-import { circular } from 'ol/geom/Polygon';
-import Point from 'ol/geom/Point';
-import { fromLonLat } from 'ol/proj';
-import { toLonLat } from 'ol/proj';
+import { toStringXY } from 'ol/coordinate'
+import Feature from 'ol/Feature'
+import { circular } from 'ol/geom/Polygon'
+import Point from 'ol/geom/Point'
+import { fromLonLat } from 'ol/proj'
+import { toLonLat } from 'ol/proj'
 
 // jQuery
 import $ from 'jquery'
+import Departures from './Departures';
 
 function MapWrapper(props) {
 
@@ -31,6 +32,7 @@ function MapWrapper(props) {
     const [featuresLayer, setFeaturesLayer] = useState()
     const [selectedCoord, setSelectedCoord] = useState()
     const [departures, setDepartures] = useState([])
+    const [showDepartures, setShowDepartures] = useState(false)
 
     // pull refs
     const mapElement = useRef()
@@ -74,7 +76,7 @@ function MapWrapper(props) {
             view: new View({
                 projection: 'EPSG:3857',
                 center: [0, 0],
-                zoom: 8
+                zoom: 12.5
             }),
             controls: []
         })
@@ -143,13 +145,15 @@ function MapWrapper(props) {
             // Request to load all stations
             //console.log(toLonLat(initialMap.getView().getCenter()))
             //let locationSignature = await GetNearbyStation();
+            console.log(locationSignature)
             $.ajax({
-                data: `<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainAnnouncement" schemaversion="1.3" orderby="AdvertisedTimeAtLocation"><FILTER><AND><EQ name="ActivityType" value="Avgang" /><EQ name="LocationSignature" value="Lp" /><OR><AND><GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" /><LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" /></AND><AND><LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" /><GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" /></AND></OR></AND></FILTER><INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>ToLocation</INCLUDE></QUERY></REQUEST>`,
+                data: `<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainAnnouncement" schemaversion="1.3" orderby="AdvertisedTimeAtLocation"><FILTER><AND><EQ name="ActivityType" value="Avgang" /><EQ name="LocationSignature" value="${locationSignature}" /><OR><AND><GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" /><LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" /></AND><AND><LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" /><GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" /></AND></OR></AND></FILTER><INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>ToLocation</INCLUDE></QUERY></REQUEST>`,
                 success: function (response) {
                     if (response == null) return;
                     console.log(response.RESPONSE.RESULT[0].TrainAnnouncement)
-                    $(response.RESPONSE.RESULT[0].TrainAnnouncement).each(function (item) { departures.push((response.RESPONSE.RESULT[0].TrainAnnouncement[item])); })
-
+                    $(response.RESPONSE.RESULT[0].TrainAnnouncement).each(function (item) { departures.push((response.RESPONSE.RESULT[0].TrainAnnouncement[item].AdvertisedTimeAtLocation)); })
+                    setDepartures(departures)
+                    setShowDepartures(true)
                     console.log(departures[0])//return response.RESPONSE.RESULT[0].TrainStation[0].LocationSignature;
                 }
             });
@@ -228,6 +232,7 @@ function MapWrapper(props) {
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>
             </div>
+            {showDepartures && <Departures departures={departures} />}
 
         </div>
     )
