@@ -130,11 +130,10 @@ function MapWrapper(props) {
             //    $("#loader").hide();
             //});
             // Load stations
-
+            GetNearbyStation(initialMap, setStationCoordinates, setDepartures);
             //Laddar sökfönster
             SearchBox();
-            //GetNearbyStation().then(response =>
-            //    GetDepartures(response));
+            
 
         });
 
@@ -162,38 +161,6 @@ function MapWrapper(props) {
             //    content.innerHTML = '<p>' + address.formatted + '</p>';
             //    initialMap.setPosition(coord);
             //});
-        }
-
-
-        function GetDepartures(locationSignature) {
-            // Request to load all stations
-            //console.log(toLonLat(initialMap.getView().getCenter()))
-            //let locationSignature = await GetNearbyStation();
-            console.log(locationSignature)
-            $.ajax({
-                data: `<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainAnnouncement" schemaversion="1.3" orderby="AdvertisedTimeAtLocation"><FILTER><AND><EQ name="ActivityType" value="Avgang" /><EQ name="LocationSignature" value="${locationSignature}" /><OR><AND><GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" /><LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" /></AND><AND><LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" /><GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" /></AND></OR></AND></FILTER><INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>ToLocation</INCLUDE></QUERY></REQUEST>`,
-                success: function (response) {
-                    if (response == null) return;
-                    console.log(response.RESPONSE.RESULT[0].TrainAnnouncement)
-                    $(response.RESPONSE.RESULT[0].TrainAnnouncement).each(function (item) { departures.push((response.RESPONSE.RESULT[0].TrainAnnouncement[item].AdvertisedTimeAtLocation)); })
-                    setDepartures(departures)
-                    setShowDepartures(true)
-                    console.log(departures[0])//return response.RESPONSE.RESULT[0].TrainStation[0].LocationSignature;
-                }
-            });
-        }
-
-        function GetNearbyStation() {
-            // Request to load all stations
-            //console.log(toLonLat(initialMap.getView().getCenter()))
-            return $.ajax({
-                data: `<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1.4"><FILTER><NEAR name="Geometry.WGS84" value="${toLonLat(initialMap.getView().getCenter())[0]} ${toLonLat(initialMap.getView().getCenter())[1]}" mindistance="0" maxdistance="10000" /></FILTER></QUERY></REQUEST>`,
-                success: function (response) {
-                    if (response == null) return;
-                    console.log(response.RESPONSE.RESULT[0].TrainStation[0].LocationSignature);
-                    GetDepartures(response.RESPONSE.RESULT[0].TrainStation[0].LocationSignature);
-                }
-            });
         }
 
         //const locate = document.createElement('div');
