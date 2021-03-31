@@ -15,10 +15,13 @@ import { circular } from 'ol/geom/Polygon'
 import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
 import { toLonLat } from 'ol/proj'
+import Geocoder from 'ol-geocoder'
 
 // jQuery
 import $ from 'jquery'
+
 import Departures from './Departures';
+import Control from 'ol/control'
 
 function MapWrapper(props) {
 
@@ -136,10 +139,39 @@ function MapWrapper(props) {
             // Load stations
             GetNearbyStation();
 
+            //Laddar sökfönster
+            SearchBox();
             //GetNearbyStation().then(response =>
             //    GetDepartures(response));
 
         });
+
+
+        //Referens: https://github.com/jonataswalker/ol-geocoder
+        function SearchBox() {
+            var geocoder = new Geocoder('nominatim', {
+                provider: 'osm',
+                //key: '__some_key__', //OSM doesn't need key
+                lang: 'en-US', //en-US, fr-FR
+                countrycodes: 'SE', //Begränsar till Sverige
+                placeholder: 'Sök efter plats...',
+                targetType: 'text-input',
+                limit: 5,
+                keepOpen: true
+            });
+            initialMap.addControl(geocoder);
+
+            //geocoder.on('addresschosen', function (evt) {
+            //    var feature = evt.feature,
+            //        coord = evt.coordinate,
+            //        address = evt.address;
+            //    // some popup solution
+            //    console.log(content)
+            //    content.innerHTML = '<p>' + address.formatted + '</p>';
+            //    initialMap.setPosition(coord);
+            //});
+        }
+
 
         function GetDepartures(locationSignature) {
             // Request to load all stations
@@ -163,9 +195,10 @@ function MapWrapper(props) {
             // Request to load all stations
             //console.log(toLonLat(initialMap.getView().getCenter()))
             return $.ajax({
-                data: `<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1.4"><FILTER><NEAR name="Geometry.WGS84" value="${toLonLat(initialMap.getView().getCenter())[0]} ${toLonLat(initialMap.getView().getCenter())[1]}" mindistance="0" maxdistance="4000" /></FILTER></QUERY></REQUEST>`,
+                data: `<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1.4"><FILTER><NEAR name="Geometry.WGS84" value="${toLonLat(initialMap.getView().getCenter())[0]} ${toLonLat(initialMap.getView().getCenter())[1]}" mindistance="0" maxdistance="10000" /></FILTER></QUERY></REQUEST>`,
                 success: function (response) {
                     if (response == null) return;
+                    console.log(response.RESPONSE.RESULT[0].TrainStation[0].LocationSignature);
                     GetDepartures(response.RESPONSE.RESULT[0].TrainStation[0].LocationSignature);
                 }
             });
@@ -227,7 +260,7 @@ function MapWrapper(props) {
     return (
         <div>
 
-            <div ref={mapElement} className="map-container"></div>
+            <div ref={mapElement} className="map"></div>
 
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>
