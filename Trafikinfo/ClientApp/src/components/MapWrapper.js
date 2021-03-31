@@ -132,7 +132,7 @@ function MapWrapper(props) {
             //GetNearbyStation().then(response =>
             //    GetDepartures(response));
 
-            GetNearbyStation(map, setStationCoordinates, setDepartures);
+            GetNearbyStation(initialMap, setStationCoordinates, setDepartures);
         });
         //});
 
