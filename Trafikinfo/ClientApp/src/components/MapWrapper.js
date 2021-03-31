@@ -138,7 +138,7 @@ function MapWrapper(props) {
         });
 
 
-        //Referens: https://github.com/jonataswalker/ol-geocoder
+        //Referens: https://github.com/jonataswalker/ol-geocoder 
         function SearchBox() {
             var geocoder = new Geocoder('nominatim', {
                 provider: 'osm',
