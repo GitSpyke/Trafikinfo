@@ -9,6 +9,7 @@ import Feature from 'ol/Feature';
 
 // components
 import MapWrapper from './components/MapWrapper'
+import Geocoder from 'ol-geocoder'
 
 function App() {
 
@@ -41,15 +42,22 @@ function App() {
 
     return (
         <div className="App">
-
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/css/ol.css" />
+            <link rel="stylesheet" href="https://unpkg.com/ol-popup@4.0.0/src/ol-popup.css" />
+            <link rel="stylesheet" href="https://unpkg.com/ol-geocoder@latest/dist/ol-geocoder.min.css" />
             <div className="app-label">
                 <p>Kartprojektetet 2021</p>
-                <button>En knapp som inte gör något!</button>
+                <button onClick="">En knapp som inte gör något!</button>
                 {/*<p>React Functional Components with OpenLayers Example</p>*/}
                 {/*<p>Click the map to reveal location coordinate via React State</p>*/}
             </div>
             {/*<div class='ol-control ol-unselectable locate'></div>*/}
             {/*<button title="Locate me">◎</button>;*/}
+            <script src="https://cdn.jsdelivr.net/gh/openlayers/openlayers.github.io@master/en/v6.4.3/build/ol.js"></script>
+            <script src="https://unpkg.com/ol-popup@4.0.0/dist/ol-popup.js"></script>
+            <script src="https://unpkg.com/ol-geocoder"></script>
+            <script src="
+control-glass.js"></script>
 
             <MapWrapper features={features} />
 
