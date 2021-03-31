@@ -43,8 +43,10 @@ function App() {
         <div className="App">
 
             <div className="app-label">
-                <p>React Functional Components with OpenLayers Example</p>
-                <p>Click the map to reveal location coordinate via React State</p>
+                <p>Kartprojektetet 2021</p>
+                <button>En knapp som inte gör något!</button>
+                {/*<p>React Functional Components with OpenLayers Example</p>*/}
+                {/*<p>Click the map to reveal location coordinate via React State</p>*/}
             </div>
             {/*<div class='ol-control ol-unselectable locate'></div>*/}
             {/*<button title="Locate me">◎</button>;*/}
