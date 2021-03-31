@@ -23,6 +23,9 @@ import $ from 'jquery'
 import Departures from './Departures';
 import Control from 'ol/control'
 
+// local
+import { GetNearbyStation, SetUpAjax } from '../main.js'
+
 function MapWrapper(props) {
 
     const source = new VectorSource();
@@ -35,7 +38,8 @@ function MapWrapper(props) {
     const [featuresLayer, setFeaturesLayer] = useState()
     const [selectedCoord, setSelectedCoord] = useState()
     const [departures, setDepartures] = useState([])
-    const [showDepartures, setShowDepartures] = useState(false)
+    const [stationCoordinates, setStationCoordinates] = useState()
+    const [showDepartures, setShowDepartures] = useState(true)
 
     // pull refs
     const mapElement = useRef()
@@ -111,33 +115,21 @@ function MapWrapper(props) {
         setFeaturesLayer(initalFeaturesLayer)
 
         $(document).ready(async function () {
-            $.support.cors = true; // Enable Cross domain requests
-            try {
-                $.ajaxSetup({
-                    type: "POST",
-                    contentType: "text/xml",
-                    dataType: "json",
-                    url: "https://api.trafikinfo.trafikverket.se/v2/data.json",
-                    error: function (msg) {
-                        if (msg.statusText == "abort") return;
-                        alert("Request failed: " + msg.statusText + "\n" + msg.responseText);
-                    }
-                });
-            }
-            catch (e) { alert("Ett fel uppstod vid initialisering."); }
+        //document.addEventListener("DOMContentLoaded", function (event) {
+            //we ready baby
+            SetUpAjax();
             // Create an ajax loading indicator
-            var loadingTimer;
-            $("#loader").hide();
-            $(document).ajaxStart(function () {
-                loadingTimer = setTimeout(function () {
-                    $("#loader").show();
-                }, 200);
-            }).ajaxStop(function () {
-                clearTimeout(loadingTimer);
-                $("#loader").hide();
-            });
+            //var loadingTimer;
+            //$("#loader").hide();
+            //$(document).ajaxStart(function () {
+            //    loadingTimer = setTimeout(function () {
+            //        $("#loader").show();
+            //    }, 200);
+            //}).ajaxStop(function () {
+            //    clearTimeout(loadingTimer);
+            //    $("#loader").hide();
+            //});
             // Load stations
-            GetNearbyStation();
 
             //Laddar sökfönster
             SearchBox();
@@ -248,10 +240,13 @@ function MapWrapper(props) {
         const clickedCoord = mapRef.current.getCoordinateFromPixel(event.pixel);
 
         // transform coord to EPSG 4326 standard Lat Long
-        const transormedCoord = transform(clickedCoord, 'EPSG:3857', 'EPSG:4326')
+        const transformedCoord = transform(clickedCoord, 'EPSG:3857', 'EPSG:4326')
 
         // set React state
-        setSelectedCoord(transormedCoord)
+        setSelectedCoord(transformedCoord)
+
+        console.log(stationCoordinates[0], transformedCoord[0])
+        if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
 
     }
 
