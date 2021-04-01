@@ -5,7 +5,7 @@ import { NavMenu } from './NavMenu';
 function Departures({ departures }){
     return (
         <div>
-            {departures.map((departure) => <h4>{departure}</h4>)}
+            {departures.map((departure) => <div className='new-line'>{departure}</div>)}
         </div>
     )
 }

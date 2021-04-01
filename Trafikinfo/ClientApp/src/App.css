@@ -14,7 +14,7 @@
   right: 0;
   z-index: -1;
   background: white;
-  /*pointer-events: none;*/
+  pointer-events: none;
 }
 
 .map{
@@ -36,8 +36,9 @@
 
 .popup {
     z-index: -5;
+    
 }
-/*.locate {
+.locate {
     top: 6em;
     left: .5em;
 }
@@ -46,7 +47,7 @@
     background-color: red;
     width: 100vw;
     height: 100vh;
-}*/
+}
 html,
 body,
 #map {
@@ -68,7 +69,12 @@ body {
     bottom: 0;
 }
 
+.new-line {
+    white-space: pre-line;
+}
+
 .ol-popup {
+    font-size: 14px;
     position: absolute;
     background-color: yellow;
     box-shadow: 0 1px 4px rgba(0,0,0,0.2);
@@ -78,6 +84,7 @@ body {
     bottom: 12px;
     left: -50px;
     min-width: 280px;
+    max-width: 25%;
 }
 
     .ol-popup:after, .ol-popup:before {
