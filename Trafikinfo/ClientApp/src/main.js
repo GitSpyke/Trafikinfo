@@ -48,8 +48,8 @@ function GetDepartures(response, map, setDepartures) {
 function UpdateDepartures(response, map, set) {
     let results = response.RESPONSE.RESULT[0];
     let departures = ["Destination Tågnummer Tid"]
-    //console.log(response.RESPONSE.RESULT[0].TrainAnnouncement)
-    $(results.TrainAnnouncement).each(function (item) { departures.push((results.TrainAnnouncement[item].AdvertisedTrainIdent + " " + results.TrainAnnouncement[item].AdvertisedTimeAtLocation.substr(11,5))); })
+    console.log(response.RESPONSE.RESULT[0].TrainAnnouncement)
+    $(results.TrainAnnouncement).each(function (item) { departures.push((results.TrainAnnouncement[item].ToLocation[0]?.LocationName + " " + results.TrainAnnouncement[item].AdvertisedTrainIdent + " " + results.TrainAnnouncement[item].AdvertisedTimeAtLocation.substr(11,5))); })
     console.log(departures)
     set(departures)
 }

@@ -14,7 +14,6 @@ import Feature from 'ol/Feature'
 import { circular } from 'ol/geom/Polygon'
 import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
-import { toLonLat } from 'ol/proj'
 import Geocoder from 'ol-geocoder'
 //import * as Popup from 'ol-popup.js';
 
@@ -40,7 +39,7 @@ function MapWrapper(props) {
     const [selectedCoord, setSelectedCoord] = useState()
     const [departures, setDepartures] = useState([])
     const [stationCoordinates, setStationCoordinates] = useState()
-    const [showDepartures, setShowDepartures] = useState(false)
+    const [showDepartures, setShowDepartures] = useState(true)
 
     // pull refs
     const mapElement = useRef()
@@ -116,7 +115,7 @@ function MapWrapper(props) {
         setFeaturesLayer(initalFeaturesLayer)
 
         $(document).ready(async function () {
-        //document.addEventListener("DOMContentLoaded", function (event) {
+            //document.addEventListener("DOMContentLoaded", function (event) {
             SetUpAjax();
             GetNearbyStation(initialMap, setStationCoordinates, setDepartures);
             AddSearchBox();
@@ -154,7 +153,7 @@ function MapWrapper(props) {
                     coord = evt.coordinate,
                     address = evt.address;
                 // some popup solution
-                
+
                 //g.setAttribute("id", "Div1");
                 console.log(content)
                 content.innerHTML = '<p>Test...' + address.formatted + '</p>';
@@ -175,11 +174,6 @@ function MapWrapper(props) {
         });
 
 
-    }, [])
-
-    // update map if features prop changes - logic formerly put into componentDidUpdate
-    useEffect(() => {
-
         if (props.features.length) { // may be null on first render
 
             // set features to map
@@ -198,6 +192,9 @@ function MapWrapper(props) {
 
     }, [props.features])
 
+    // update map if features prop changes - logic formerly put into componentDidUpdate
+
+
     // map click handler
     const handleMapClick = (event) => {
 
@@ -209,28 +206,30 @@ function MapWrapper(props) {
         const transformedCoord = transform(clickedCoord, 'EPSG:3857', 'EPSG:4326')
 
         // set React state
-         //remove/ta bort
+        //setShowDepartures(false);
         setSelectedCoord(transformedCoord)
-
         //console.log(stationCoordinates[0], transformedCoord[0])
         //if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
+        //console.log(showDepartures, selectedCoord)
+        console.log("showDepartures: " + showDepartures)
 
     }
+
 
     console.log(stationCoordinates)
     // render component
     return (
         <div>
 
-            <div ref={mapElement} className="map"></div>
-            <div id="popup" class="ol-popup">
+            <div onClick={() => setShowDepartures(!showDepartures)} ref={mapElement} className="map"></div>
+            {showDepartures && <div id="popup" class="ol-popup">
                 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
                 <div id="popup-content"><Departures departures={departures} /></div>
-            </div>
+            </div>}
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>
             </div>
-         
+
 
         </div>
     )
