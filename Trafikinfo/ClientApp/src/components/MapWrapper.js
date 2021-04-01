@@ -212,8 +212,8 @@ function MapWrapper(props) {
          //remove/ta bort
         setSelectedCoord(transformedCoord)
 
-        console.log(stationCoordinates[0], transformedCoord[0])
-        if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
+        //console.log(stationCoordinates[0], transformedCoord[0])
+        //if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
 
     }
 
@@ -225,12 +225,12 @@ function MapWrapper(props) {
             <div ref={mapElement} className="map"></div>
             <div id="popup" class="ol-popup">
                 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-                <div id="popup-content"></div>
+                <div id="popup-content"><Departures departures={departures} /></div>
             </div>
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>
             </div>
-            <Departures departures={departures} />
+         
 
         </div>
     )
