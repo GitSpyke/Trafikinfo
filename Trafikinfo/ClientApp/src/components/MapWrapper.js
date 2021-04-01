@@ -39,7 +39,7 @@ function MapWrapper(props) {
     const [selectedCoord, setSelectedCoord] = useState()
     const [departures, setDepartures] = useState([])
     const [stationCoordinates, setStationCoordinates] = useState()
-    const [showDepartures, setShowDepartures] = useState(true)
+    const [showDepartures, setShowDepartures] = useState(false)
 
     // pull refs
     const mapElement = useRef()
@@ -116,30 +116,14 @@ function MapWrapper(props) {
 
         $(document).ready(async function () {
         //document.addEventListener("DOMContentLoaded", function (event) {
-            //we ready baby
             SetUpAjax();
-            // Create an ajax loading indicator
-            //var loadingTimer;
-            //$("#loader").hide();
-            //$(document).ajaxStart(function () {
-            //    loadingTimer = setTimeout(function () {
-            //        $("#loader").show();
-            //    }, 200);
-            //}).ajaxStop(function () {
-            //    clearTimeout(loadingTimer);
-            //    $("#loader").hide();
-            //});
-            // Load stations
             GetNearbyStation(initialMap, setStationCoordinates, setDepartures);
-            //Laddar sökfönster
-            SearchBox();
-            
-
+            AddSearchBox();
         });
 
 
         //Referens: https://github.com/jonataswalker/ol-geocoder 
-        function SearchBox() {
+        function AddSearchBox() {
             var geocoder = new Geocoder('nominatim', {
                 provider: 'osm',
                 //key: '__some_key__', //OSM doesn't need key
@@ -157,23 +141,22 @@ function MapWrapper(props) {
             //        coord = evt.coordinate,
             //        address = evt.address;
             //    // some popup solution
-            //    console.log(content)
             //    content.innerHTML = '<p>' + address.formatted + '</p>';
             //    initialMap.setPosition(coord);
             //});
         }
 
-        //const locate = document.createElement('div');
-        //locate.className = 'ol-control ol-unselectable locate';
-        //locate.innerHTML = '<button title="Locate me">◎</button>';
-        //locate.addEventListener('click', function () {
-        //    if (!source.isEmpty()) {
-        //        initialMap.getView().fit(source.getExtent(), {
-        //            maxZoom: 18,
-        //            duration: 500
-        //        });
-        //    }
-        //});
+        const locate = document.createElement('div');
+        locate.className = 'ol-control ol-unselectable locate';
+        locate.innerHTML = '<button title="Locate me">◎</button>';
+        locate.addEventListener('click', function () {
+            if (!source.isEmpty()) {
+                initialMap.getView().fit(source.getExtent(), {
+                    maxZoom: 18,
+                    duration: 500
+                });
+            }
+        });
 
 
     }, [])
@@ -210,14 +193,15 @@ function MapWrapper(props) {
         const transformedCoord = transform(clickedCoord, 'EPSG:3857', 'EPSG:4326')
 
         // set React state
+         //remove/ta bort
         setSelectedCoord(transformedCoord)
 
-        console.log(stationCoordinates[0], transformedCoord[0])
-        if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
-
+        //console.log(stationCoordinates[0], transformedCoord[0])
+        //if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
+        return setShowDepartures(true)
     }
 
-
+    console.log(stationCoordinates)
     // render component
     return (
         <div>
@@ -227,7 +211,7 @@ function MapWrapper(props) {
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>
             </div>
-            {showDepartures && <Departures departures={departures} />}
+            <Departures departures={departures} />
 
         </div>
     )
