@@ -16,6 +16,7 @@ import Point from 'ol/geom/Point'
 import { fromLonLat } from 'ol/proj'
 import { toLonLat } from 'ol/proj'
 import Geocoder from 'ol-geocoder'
+//import * as Popup from 'ol-popup.js';
 
 // jQuery
 import $ from 'jquery'
@@ -151,16 +152,30 @@ function MapWrapper(props) {
                 keepOpen: true
             });
             initialMap.addControl(geocoder);
+            var container = document.getElementById('popup');
+            var content = document.getElementById('popup-content');
+            var closer = document.getElementById('popup-closer');
 
-            //geocoder.on('addresschosen', function (evt) {
-            //    var feature = evt.feature,
-            //        coord = evt.coordinate,
-            //        address = evt.address;
-            //    // some popup solution
-            //    console.log(content)
-            //    content.innerHTML = '<p>' + address.formatted + '</p>';
-            //    initialMap.setPosition(coord);
+
+            //initialMap.on('singleclick', function (evt) {
+            //    var coordinate = evt.coordinate;
+            //    var hdms = toStringHDMS(toLonLat(coordinate));
+
+            //    content.innerHTML = '<p>You clicked here:</p><code>' + hdms + '</code>';
+            //    overlay.setPosition(coordinate);
             //});
+
+            geocoder.on('addresschosen', function (evt) {
+                var feature = evt.feature,
+                    coord = evt.coordinate,
+                    address = evt.address;
+                // some popup solution
+                
+                //g.setAttribute("id", "Div1");
+                console.log(content)
+                content.innerHTML = '<p>Test...' + address.formatted + '</p>';
+                //initialMap.setPosition(coord);
+            });
         }
 
         //const locate = document.createElement('div');
@@ -212,8 +227,8 @@ function MapWrapper(props) {
         // set React state
         setSelectedCoord(transformedCoord)
 
-        console.log(stationCoordinates[0], transformedCoord[0])
-        if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
+        //console.log(stationCoordinates[0], transformedCoord[0])
+        //if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
 
     }
 
@@ -223,7 +238,10 @@ function MapWrapper(props) {
         <div>
 
             <div ref={mapElement} className="map"></div>
-
+            <div id="popup" class="ol-popup">
+                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
+                <div id="popup-content"></div>
+            </div>
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>
             </div>
