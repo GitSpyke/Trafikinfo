@@ -21,7 +21,7 @@ import Geocoder from 'ol-geocoder'
 import $ from 'jquery'
 
 import Departures from './Departures';
-import Control from 'ol/control'
+//import Control from 'ol/control'
 
 // local
 import { GetNearbyStation, SetUpAjax, CheckIfStationLocation } from '../main.js'
@@ -134,9 +134,9 @@ function MapWrapper(props) {
                 keepOpen: true
             });
             initialMap.addControl(geocoder);
-            var container = document.getElementById('popup');
+            //var container = document.getElementById('popup');
             var content = document.getElementById('popup-content');
-            var closer = document.getElementById('popup-closer');
+            //var closer = document.getElementById('popup-closer');
 
             //geocoder.on('addresschosen', function (evt) {
             //    var feature = evt.feature,
