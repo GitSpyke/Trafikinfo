@@ -8,13 +8,12 @@ import TileLayer from 'ol/layer/Tile'
 import VectorLayer from 'ol/layer/Vector'
 import VectorSource from 'ol/source/Vector'
 import XYZ from 'ol/source/XYZ'
-import { transform } from 'ol/proj'
 import { toStringXY } from 'ol/coordinate'
 import Feature from 'ol/Feature'
 import { circular } from 'ol/geom/Polygon'
 import Point from 'ol/geom/Point'
-import { fromLonLat } from 'ol/proj'
 import Geocoder from 'ol-geocoder'
+import { transform, fromLonLat, toLonLat } from 'ol/proj'
 //import * as Popup from 'ol-popup.js';
 
 // jQuery
@@ -36,8 +35,8 @@ function MapWrapper(props) {
     // set intial state
     const [map, setMap] = useState()
     const [featuresLayer, setFeaturesLayer] = useState()
-    const [selectedCoord, setSelectedCoord] = useState()
-    const [departures, setDepartures] = useState([])
+    const [selectedCoord, setSelectedCoord] = useState([0, 0])
+    const [departures, setDepartures] = useState()
     const [stationCoord, setStationCoord] = useState()
     const [showDepartures, setShowDepartures] = useState(false)
 
@@ -117,7 +116,7 @@ function MapWrapper(props) {
         $(document).ready(async function () {
             //document.addEventListener("DOMContentLoaded", function (event) {
             await SetUpAjax();
-            GetNearbyStation(initialMap, setStationCoord, setDepartures);
+            GetNearbyStation(setStationCoord, setDepartures, toLonLat(initialMap.getView().getCenter()));
             AddSearchBox();
         });
 
@@ -138,15 +137,6 @@ function MapWrapper(props) {
             var content = document.getElementById('popup-content');
             //var closer = document.getElementById('popup-closer');
 
-            //geocoder.on('addresschosen', function (evt) {
-            //    var feature = evt.feature,
-            //        coord = evt.coordinate,
-            //        address = evt.address;
-            //    // some popup solution
-            //    content.innerHTML = '<p>' + address.formatted + '</p>';
-            //    initialMap.setPosition(coord);
-            //});
-
             geocoder.on('addresschosen', function (evt) {
                 var feature = evt.feature,
                     coord = evt.coordinate,
@@ -155,22 +145,24 @@ function MapWrapper(props) {
 
                 //g.setAttribute("id", "Div1");
                 console.log(content)
-                content.innerHTML = '<p>Test...' + address.formatted + '</p>';
+                //content.innerHTML = '<p>' + address.formatted + '</p>';
+
+                //content.innerHTML = '<p>Test...' + address.formatted + '</p>';
                 //initialMap.setPosition(coord);
             });
         }
 
-        const locate = document.createElement('div');
-        locate.className = 'ol-control ol-unselectable locate';
-        locate.innerHTML = '<button title="Locate me">◎</button>';
-        locate.addEventListener('click', function () {
-            if (!source.isEmpty()) {
-                initialMap.getView().fit(source.getExtent(), {
-                    maxZoom: 18,
-                    duration: 500
-                });
-            }
-        });
+        //const locate = document.createElement('div');
+        //locate.className = 'ol-control ol-unselectable locate';
+        //locate.innerHTML = '<button title="Locate me">◎</button>';
+        //locate.addEventListener('click', function () {
+        //    if (!source.isEmpty()) {
+        //        initialMap.getView().fit(source.getExtent(), {
+        //            maxZoom: 18,
+        //            duration: 500
+        //        });
+        //    }
+        //});
 
 
         if (props.features.length) { // may be null on first render
@@ -191,30 +183,26 @@ function MapWrapper(props) {
 
     }, [props.features])
 
-    // update map if features prop changes - logic formerly put into componentDidUpdate
-
-
     // map click handler
     const handleMapClick = (event) => {
 
         // get clicked coordinate using mapRef to access current React state inside OpenLayers callback
         //  https://stackoverflow.com/a/60643670
         const clickedCoord = transform(mapRef.current.getCoordinateFromPixel(event.pixel), 'EPSG:3857', 'EPSG:4326');
-
+        GetNearbyStation(setStationCoord, setDepartures, clickedCoord)
+        console.log(stationCoord)
         // set React state
         setSelectedCoord(clickedCoord)
-        //console.log(stationCoord[0], transformedCoord[0])
-        //console.log(showDepartures, selectedCoord)
     }
 
     // render component
     return (
         <div>
 
-            <div onClick={() => setShowDepartures(CheckIfStationLocation(stationCoord, selectedCoord))} ref={mapElement} className="map"></div>
-            {showDepartures && <div id="popup" class="ol-popup">
-                <a href="#" id="popup-closer" class="ol-popup-closer"></a>
-                <div id="popup-content"><Departures departures={departures} /></div>
+            <div onClick={() => setShowDepartures(Math.abs(stationCoord[0] - selectedCoord[0]) < 0.01)} ref={mapElement} className="map"></div>
+            {showDepartures && <div id="popup" className="ol-popup">
+                <a href="#" id="popup-closer" className="ol-popup-closer"></a>
+                <div id="popup-content"><table><Departures departures={departures} /></table></div>
             </div>}
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>

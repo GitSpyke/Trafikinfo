@@ -2,11 +2,22 @@ import React, { Component } from 'react';
 import { Container } from 'reactstrap';
 import { NavMenu } from './NavMenu';
 
-function Departures({ departures }){
+function Departures({ departures }) {
     return (
-        <div>
-            {departures.map((departure) => <div className='new-line'>{departure}</div>)}
-        </div>
+            <tbody>
+                <tr>
+                    <th>Destination</th>
+                    <th>Nummer</th>
+                    <th>Tid</th>
+                </tr>
+                {departures.map((departure, index) => {
+                    return <tr key={departure.index}>
+                        <td></td>
+                        <td>{departure.number}</td>
+                        <td>{departure.time}</td>
+                    </tr>;
+                })}
+            </tbody>
     )
 }
 
