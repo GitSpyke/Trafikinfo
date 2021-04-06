@@ -24,7 +24,7 @@ import Departures from './Departures';
 import Control from 'ol/control'
 
 // local
-import { GetNearbyStation, SetUpAjax } from '../main.js'
+import { GetNearbyStation, SetUpAjax, CheckIfStationLocation } from '../main.js'
 
 function MapWrapper(props) {
 
@@ -38,8 +38,8 @@ function MapWrapper(props) {
     const [featuresLayer, setFeaturesLayer] = useState()
     const [selectedCoord, setSelectedCoord] = useState()
     const [departures, setDepartures] = useState([])
-    const [stationCoordinates, setStationCoordinates] = useState()
-    const [showDepartures, setShowDepartures] = useState(true)
+    const [stationCoord, setStationCoord] = useState()
+    const [showDepartures, setShowDepartures] = useState(false)
 
     // pull refs
     const mapElement = useRef()
@@ -116,11 +116,10 @@ function MapWrapper(props) {
 
         $(document).ready(async function () {
             //document.addEventListener("DOMContentLoaded", function (event) {
-            SetUpAjax();
-            GetNearbyStation(initialMap, setStationCoordinates, setDepartures);
+            await SetUpAjax();
+            GetNearbyStation(initialMap, setStationCoord, setDepartures);
             AddSearchBox();
         });
-
 
         //Referens: https://github.com/jonataswalker/ol-geocoder 
         function AddSearchBox() {
@@ -200,28 +199,19 @@ function MapWrapper(props) {
 
         // get clicked coordinate using mapRef to access current React state inside OpenLayers callback
         //  https://stackoverflow.com/a/60643670
-        const clickedCoord = mapRef.current.getCoordinateFromPixel(event.pixel);
-
-        // transform coord to EPSG 4326 standard Lat Long
-        const transformedCoord = transform(clickedCoord, 'EPSG:3857', 'EPSG:4326')
+        const clickedCoord = transform(mapRef.current.getCoordinateFromPixel(event.pixel), 'EPSG:3857', 'EPSG:4326');
 
         // set React state
-        //setShowDepartures(false);
-        setSelectedCoord(transformedCoord)
-        //console.log(stationCoordinates[0], transformedCoord[0])
-        //if (Math.abs(stationCoordinates[0] - transformedCoord[0]) < 5) { setShowDepartures(true) }
+        setSelectedCoord(clickedCoord)
+        //console.log(stationCoord[0], transformedCoord[0])
         //console.log(showDepartures, selectedCoord)
-        console.log("showDepartures: " + showDepartures)
-
     }
 
-
-    console.log(stationCoordinates)
     // render component
     return (
         <div>
 
-            <div onClick={() => setShowDepartures(!showDepartures)} ref={mapElement} className="map"></div>
+            <div onClick={() => setShowDepartures(CheckIfStationLocation(stationCoord, selectedCoord))} ref={mapElement} className="map"></div>
             {showDepartures && <div id="popup" class="ol-popup">
                 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
                 <div id="popup-content"><Departures departures={departures} /></div>
