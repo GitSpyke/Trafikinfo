@@ -12,7 +12,6 @@ import { toStringXY } from 'ol/coordinate'
 import Feature from 'ol/Feature'
 import { circular } from 'ol/geom/Polygon'
 import Point from 'ol/geom/Point'
-import Geocoder from 'ol-geocoder'
 import { transform, fromLonLat, toLonLat } from 'ol/proj'
 //import * as Popup from 'ol-popup.js';
 
@@ -23,7 +22,7 @@ import Departures from './Departures';
 //import Control from 'ol/control'
 
 // local
-import { GetNearbyStation, SetUpAjax, CheckIfStationLocation } from '../main.js'
+import { GetNearbyStation, SetUpAjax, AddSearchBox } from '../main.js'
 
 function MapWrapper(props) {
 
@@ -39,6 +38,7 @@ function MapWrapper(props) {
     const [departures, setDepartures] = useState()
     const [stationCoord, setStationCoord] = useState()
     const [showDepartures, setShowDepartures] = useState(false)
+    const [locationCoord, setLocationCoord] = useState()
 
     // pull refs
     const mapElement = useRef()
@@ -50,7 +50,6 @@ function MapWrapper(props) {
 
     // initialize map on first render - logic formerly put into componentDidMount
     useEffect(() => {
-
         // create and add vector source layer
         const initalFeaturesLayer = new VectorLayer({
             source: new VectorSource()
@@ -93,11 +92,12 @@ function MapWrapper(props) {
         // set map onclick handler
         initialMap.on('click', handleMapClick)
 
-        navigator.geolocation.watchPosition(function (pos) {
-            //ajax anropet ska göras här sen
+        navigator.geolocation.getCurrentPosition(function (pos) {// maybe watchPosition instead
+            //ajax anrop ska göras här sen
             const coords = [pos.coords.longitude, pos.coords.latitude];
             const accuracy = circular(coords, pos.coords.accuracy);
-            initialMap.getView().setCenter(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'));
+            setLocationCoord(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'));
+            initialMap.getView().setCenter(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'))
             source.clear(true);
             source.addFeatures([
                 new Feature(accuracy.transform('EPSG:4326', initialMap.getView().getProjection())),
@@ -113,44 +113,13 @@ function MapWrapper(props) {
         setMap(initialMap)
         setFeaturesLayer(initalFeaturesLayer)
 
+        AddSearchBox(initialMap, setStationCoord, setDepartures);
+
         $(document).ready(async function () {
             //document.addEventListener("DOMContentLoaded", function (event) {
             await SetUpAjax();
             GetNearbyStation(setStationCoord, setDepartures, toLonLat(initialMap.getView().getCenter()));
-            AddSearchBox();
         });
-
-        //Referens: https://github.com/jonataswalker/ol-geocoder 
-        function AddSearchBox() {
-            var geocoder = new Geocoder('nominatim', {
-                provider: 'osm',
-                //key: '__some_key__', //OSM doesn't need key
-                lang: 'en-US', //en-US, fr-FR
-                countrycodes: 'SE', //Begränsar till Sverige
-                placeholder: 'Sök efter plats...',
-                targetType: 'text-input',
-                limit: 5,
-                keepOpen: true
-            });
-            initialMap.addControl(geocoder);
-            //var container = document.getElementById('popup');
-            var content = document.getElementById('popup-content');
-            //var closer = document.getElementById('popup-closer');
-
-            geocoder.on('addresschosen', function (evt) {
-                var feature = evt.feature,
-                    coord = evt.coordinate,
-                    address = evt.address;
-                // some popup solution
-
-                //g.setAttribute("id", "Div1");
-                console.log(content)
-                //content.innerHTML = '<p>' + address.formatted + '</p>';
-
-                //content.innerHTML = '<p>Test...' + address.formatted + '</p>';
-                //initialMap.setPosition(coord);
-            });
-        }
 
         //const locate = document.createElement('div');
         //locate.className = 'ol-control ol-unselectable locate';
@@ -189,8 +158,6 @@ function MapWrapper(props) {
         // get clicked coordinate using mapRef to access current React state inside OpenLayers callback
         //  https://stackoverflow.com/a/60643670
         const clickedCoord = transform(mapRef.current.getCoordinateFromPixel(event.pixel), 'EPSG:3857', 'EPSG:4326');
-        GetNearbyStation(setStationCoord, setDepartures, clickedCoord)
-        console.log(stationCoord)
         // set React state
         setSelectedCoord(clickedCoord)
     }
@@ -198,8 +165,7 @@ function MapWrapper(props) {
     // render component
     return (
         <div>
-
-            <div onClick={() => setShowDepartures(Math.abs(stationCoord[0] - selectedCoord[0]) < 0.01)} ref={mapElement} className="map"></div>
+            <div onClick={() => setShowDepartures((Math.abs(stationCoord[0] - selectedCoord[0]) < 0.01 && Math.abs(stationCoord[1] - selectedCoord[1]) < 0.01))} ref={mapElement} className="map"></div>
             {showDepartures && <div id="popup" className="ol-popup">
                 <a href="#" id="popup-closer" className="ol-popup-closer"></a>
                 <div id="popup-content"><table><Departures departures={departures} /></table></div>

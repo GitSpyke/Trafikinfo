@@ -1,5 +1,8 @@
 import $ from 'jquery'
 
+import Geocoder from 'ol-geocoder'
+import { transform } from 'ol/proj'
+
 export function SetUpAjax() {
     //$.support.cors = true; // Enable Cross domain requests
     $.ajaxSetup({
@@ -29,6 +32,39 @@ export async function GetNearbyStation(setStationCoord, setDepartures, coordinat
     let results = departuresData.RESPONSE.RESULT[0]
     $(results.TrainAnnouncement).each(function (item) { departures.push(({ number: results.TrainAnnouncement[item].AdvertisedTrainIdent, time:results.TrainAnnouncement[item].AdvertisedTimeAtLocation.substr(11, 5) })); })//destination: results.TrainAnnouncement[item].ToLocation[0].LocationName, 
     setDepartures(departures.slice(0, 5))
+}
+
+//Referens: https://github.com/jonataswalker/ol-geocoder 
+export function AddSearchBox(map, setStationCoord, setDepartures) {
+    var geocoder = new Geocoder('nominatim', {
+        provider: 'osm',
+        //key: '__some_key__', //OSM doesn't need key
+        lang: 'en-US', //en-US, fr-FR
+        countrycodes: 'SE', //Begränsar till Sverige
+        placeholder: 'Sök efter plats...',
+        targetType: 'text-input',
+        limit: 5,
+        keepOpen: true
+    });
+    map.addControl(geocoder);
+    //var container = document.getElementById('popup');
+    var content = document.getElementById('popup-content');
+    //var closer = document.getElementById('popup-closer');
+
+    geocoder.on('addresschosen', function (evt) {
+        var feature = evt.feature,
+            coord = evt.coordinate,
+            address = evt.address;
+        // some popup solution
+
+        //g.setAttribute("id", "Div1");
+        //content.innerHTML = '<p>' + address.formatted + '</p>';
+
+        //content.innerHTML = '<p>Test...' + address.formatted + '</p>';
+        //initialMap.setPosition(coord);
+        //console.log(transform(coord, 'EPSG:3857', 'EPSG:4326'))
+        GetNearbyStation(setStationCoord, setDepartures, transform(coord, 'EPSG:3857', 'EPSG:4326'))
+    });
 }
 
 // Create an ajax loading indicator
