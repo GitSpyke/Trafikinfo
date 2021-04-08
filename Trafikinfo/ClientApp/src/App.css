@@ -76,15 +76,16 @@ body {
 .ol-popup {
     font-size: 14px;
     position: absolute;
-    background-color: yellow;
+    background-color: white;
     box-shadow: 0 1px 4px rgba(0,0,0,0.2);
     padding: 15px;
     border-radius: 10px;
     border: 1px solid #cccccc;
     bottom: 12px;
-    left: -50px;
+    left: 20px;
     min-width: 280px;
     max-width: 25%;
+    opacity: 75%;
 }
 
     .ol-popup:after, .ol-popup:before {

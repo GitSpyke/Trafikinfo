@@ -11,8 +11,8 @@ function Departures({ departures }) {
                     <th>Tid</th>
                 </tr>
                 {departures.map((departure, index) => {
-                    return <tr key={departure.index}>
-                        <td></td>
+                    return <tr key={index}>
+                        <td>{departure.destination}</td>
                         <td>{departure.number}</td>
                         <td>{departure.time}</td>
                     </tr>;
