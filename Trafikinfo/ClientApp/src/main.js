@@ -24,6 +24,7 @@ async function doAjax(data) {
 }
 
 // loads stations and departures
+
 export async function GetNearbyStation(setStationCoord, setDepartures, coordinates) {
     let departures = []
     let locationData = await doAjax('<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1"><FILTER><EQ name="Advertised" value="true" /></FILTER><INCLUDE>AdvertisedLocationName</INCLUDE><INCLUDE>LocationSignature</INCLUDE></QUERY></REQUEST>')
@@ -32,7 +33,6 @@ export async function GetNearbyStation(setStationCoord, setDepartures, coordinat
     $(stationsResults).each(function (station) {
         stations[stationsResults[station].LocationSignature] = stationsResults[station].AdvertisedLocationName;
     })
-    while (setStationCoord[0] === 0) { }
     let stationData = await doAjax(`<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1.4"><FILTER><NEAR name="Geometry.WGS84" value="${coordinates[0]} ${coordinates[1]}" mindistance="0" maxdistance="4000" /></FILTER></QUERY></REQUEST>`)
     if (stationData.RESPONSE.RESULT[0].TrainStation[0]) {
         setStationCoord(stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(/\(|\)| /))
