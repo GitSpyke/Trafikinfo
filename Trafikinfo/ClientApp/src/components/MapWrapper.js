@@ -91,12 +91,11 @@ function MapWrapper(props) {
         // set map onclick handler
         initialMap.on('click', handleMapClick)
 
-        navigator.geolocation.getCurrentPosition(function (pos) {// maybe watchPosition instead
-            //ajax anrop ska göras här sen
+        navigator.geolocation.getCurrentPosition(async function (pos) {
             const coords = [pos.coords.longitude, pos.coords.latitude];
             const accuracy = circular(coords, pos.coords.accuracy);
             setLocationCoord(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'));
-            initialMap.getView().setCenter(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'))
+            await initialMap.getView().setCenter(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'))
             source.clear(true);
             source.addFeatures([
                 new Feature(accuracy.transform('EPSG:4326', initialMap.getView().getProjection())),
@@ -150,7 +149,6 @@ function MapWrapper(props) {
         setSelectedCoord(clickedCoord)
     }
 
-    // render component
     return (
         <div>
             <div onClick={() => setShowDepartures((Math.abs(stationCoord[0] - selectedCoord[0]) < 0.01 && Math.abs(stationCoord[1] - selectedCoord[1]) < 0.01))} ref={mapElement} className="map"></div>
