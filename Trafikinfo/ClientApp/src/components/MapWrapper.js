@@ -91,7 +91,7 @@ function MapWrapper(props) {
         // set map onclick handler
         initialMap.on('click', handleMapClick)
 
-        navigator.geolocation.watchPosition(function (pos) {// maybe watchPosition instead
+        navigator.geolocation.getCurrentPosition(function (pos) {// maybe watchPosition instead
             //ajax anrop ska göras här sen
             const coords = [pos.coords.longitude, pos.coords.latitude];
             const accuracy = circular(coords, pos.coords.accuracy);

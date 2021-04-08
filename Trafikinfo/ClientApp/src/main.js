@@ -29,7 +29,7 @@ export async function GetNearbyStation(setStationCoord, setDepartures, coordinat
     let locationData = await doAjax('<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1"><FILTER><EQ name="Advertised" value="true" /></FILTER><INCLUDE>AdvertisedLocationName</INCLUDE><INCLUDE>LocationSignature</INCLUDE></QUERY></REQUEST>')
     let stationsResults = locationData.RESPONSE.RESULT[0].TrainStation
 
-    var stations = {};
+    let stations = {};
     $(stationsResults).each(function (station) {
         stations[stationsResults[station].LocationSignature] = stationsResults[station].AdvertisedLocationName;
     })
