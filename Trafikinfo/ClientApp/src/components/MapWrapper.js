@@ -91,11 +91,11 @@ function MapWrapper(props) {
         // set map onclick handler
         initialMap.on('click', handleMapClick)
 
-        navigator.geolocation.getCurrentPosition(async function (pos) {
+        navigator.geolocation.getCurrentPosition(function (pos) {
             const coords = [pos.coords.longitude, pos.coords.latitude];
             const accuracy = circular(coords, pos.coords.accuracy);
             setLocationCoord(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'));
-            await initialMap.getView().setCenter(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'))
+            initialMap.getView().setCenter(transform([pos.coords.longitude, pos.coords.latitude], 'EPSG:4326', 'EPSG:3857'))
             source.clear(true);
             source.addFeatures([
                 new Feature(accuracy.transform('EPSG:4326', initialMap.getView().getProjection())),
