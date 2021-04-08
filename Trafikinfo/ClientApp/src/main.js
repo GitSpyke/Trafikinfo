@@ -26,7 +26,6 @@ async function doAjax(data) {
 // loads stations and departures
 export async function GetNearbyStation(setStationCoord, setDepartures, coordinates) {
     let departures = []
-
     let locationData = await doAjax('<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1"><FILTER><EQ name="Advertised" value="true" /></FILTER><INCLUDE>AdvertisedLocationName</INCLUDE><INCLUDE>LocationSignature</INCLUDE></QUERY></REQUEST>')
     let stationsResults = locationData.RESPONSE.RESULT[0].TrainStation
     let stations = {};
@@ -35,7 +34,8 @@ export async function GetNearbyStation(setStationCoord, setDepartures, coordinat
     })
     let stationData = await doAjax(`<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1.4"><FILTER><NEAR name="Geometry.WGS84" value="${coordinates[0]} ${coordinates[1]}" mindistance="0" maxdistance="4000" /></FILTER></QUERY></REQUEST>`)
     if (stationData.RESPONSE.RESULT[0].TrainStation[0]) {
-        setStationCoord(stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(" "))
+        setStationCoord(stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(/\(|\)| /))
+        console.log(stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(/\(|\)| /))
         let departuresData = await doAjax(`<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainAnnouncement" schemaversion="1.4" orderby="AdvertisedTimeAtLocation"><FILTER><AND><EQ name="ActivityType" value="Avgang" /><EQ name="LocationSignature" value="${stationData.RESPONSE.RESULT[0].TrainStation[0].LocationSignature}" /><OR><AND><GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" /><LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" /></AND><AND><LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" /><GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" /></AND></OR></AND></FILTER><INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>ToLocation</INCLUDE></QUERY></REQUEST>`)
         let departuresResults = departuresData.RESPONSE.RESULT[0]
         $(departuresResults.TrainAnnouncement).each(function (item) {
