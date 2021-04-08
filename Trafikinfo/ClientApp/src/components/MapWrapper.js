@@ -13,7 +13,6 @@ import Feature from 'ol/Feature'
 import { circular } from 'ol/geom/Polygon'
 import Point from 'ol/geom/Point'
 import { transform, fromLonLat, toLonLat } from 'ol/proj'
-//import * as Popup from 'ol-popup.js';
 
 // jQuery
 import $ from 'jquery'
@@ -121,17 +120,6 @@ function MapWrapper(props) {
             GetNearbyStation(setStationCoord, setDepartures, toLonLat(initialMap.getView().getCenter()));
         });
 
-        //const locate = document.createElement('div');
-        //locate.className = 'ol-control ol-unselectable locate';
-        //locate.innerHTML = '<button title="Locate me">◎</button>';
-        //locate.addEventListener('click', function () {
-        //    if (!source.isEmpty()) {
-        //        initialMap.getView().fit(source.getExtent(), {
-        //            maxZoom: 18,
-        //            duration: 500
-        //        });
-        //    }
-        //});
 
 
         if (props.features.length) { // may be null on first render
