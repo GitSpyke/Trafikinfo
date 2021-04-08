@@ -92,7 +92,7 @@ function MapWrapper(props) {
         // set map onclick handler
         initialMap.on('click', handleMapClick)
 
-        navigator.geolocation.getCurrentPosition(function (pos) {// maybe watchPosition instead
+        navigator.geolocation.watchPosition(function (pos) {// maybe watchPosition instead
             //ajax anrop ska göras här sen
             const coords = [pos.coords.longitude, pos.coords.latitude];
             const accuracy = circular(coords, pos.coords.accuracy);
@@ -173,6 +173,8 @@ function MapWrapper(props) {
             <div className="clicked-coord-label">
                 <p>{(selectedCoord) ? toStringXY(selectedCoord, 5) : ''}</p>
             </div>
+
+            {/*<button onClick={() => initialMap.getView().setCenter([locationCoord[0], locationCoord[1]], 'EPSG:4326', 'EPSG:3857')} title="tracker">Track me</button>*/}
 
 
         </div>
