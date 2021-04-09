@@ -116,7 +116,12 @@ function MapWrapper(props) {
         $(document).ready(async function () {
             //document.addEventListener("DOMContentLoaded", function (event) {
             await SetUpAjax();
-            GetNearbyStation(setStationCoord, setDepartures, toLonLat(initialMap.getView().getCenter()));
+            let coords = await GetNearbyStation(setStationCoord, setDepartures, toLonLat(initialMap.getView().getCenter()));
+
+            source.addFeatures([
+                //new Feature(accuracy.transform('EPSG:4326', initialMap.getView().getProjection())),
+                new Feature(new Point(fromLonLat(coords))),
+            ]);
         });
 
 

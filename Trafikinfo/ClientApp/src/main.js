@@ -47,6 +47,7 @@ export async function GetNearbyStation(setStationCoord, setDepartures, coordinat
         setDepartures(departures.slice(0, 5))
     }
     else { alert("No nearby stations.") }
+    return stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(/\(|\)| /)
 }
 
 
