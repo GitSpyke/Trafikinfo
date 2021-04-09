@@ -1,7 +1,11 @@
 import $ from 'jquery'
 
 import Geocoder from 'ol-geocoder'
-import { transform } from 'ol/proj'
+import Point from 'ol/geom/Point'
+import Feature from 'ol/Feature'
+
+import { transform, fromLonLat } from 'ol/proj'
+import { Icon, Style } from 'ol/style';
 
 export function SetUpAjax() {
     //$.support.cors = true; // Enable Cross domain requests
@@ -25,7 +29,7 @@ async function doAjax(data) {
 
 // loads stations and departures
 
-export async function GetNearbyStation(setStationCoord, setDepartures, coordinates) {
+export async function GetNearbyStation(setStationCoord, setDepartures, coordinates, source) {
     let departures = []
     let locationData = await doAjax('<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1"><FILTER><EQ name="Advertised" value="true" /></FILTER><INCLUDE>AdvertisedLocationName</INCLUDE><INCLUDE>LocationSignature</INCLUDE></QUERY></REQUEST>')
     let stationsResults = locationData.RESPONSE.RESULT[0].TrainStation
@@ -35,9 +39,16 @@ export async function GetNearbyStation(setStationCoord, setDepartures, coordinat
     })
     let stationData = await doAjax(`<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainStation" schemaversion="1.4"><FILTER><NEAR name="Geometry.WGS84" value="${coordinates[0]} ${coordinates[1]}" mindistance="0" maxdistance="4000" /></FILTER></QUERY></REQUEST>`)
     if (stationData.RESPONSE.RESULT[0].TrainStation[0]) {
-        setStationCoord(stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(/\(|\)| /))
+        let stationCoord = stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(/\(|\)| /)
+        setStationCoord(stationCoord)
         let departuresData = await doAjax(`<REQUEST><LOGIN authenticationkey="6a3d19e740114ade9e1ccc03d3eee5b1" /><QUERY objecttype="TrainAnnouncement" schemaversion="1.4" orderby="AdvertisedTimeAtLocation"><FILTER><AND><EQ name="ActivityType" value="Avgang" /><EQ name="LocationSignature" value="${stationData.RESPONSE.RESULT[0].TrainStation[0].LocationSignature}" /><OR><AND><GT name="AdvertisedTimeAtLocation" value="$dateadd(-00:15:00)" /><LT name="AdvertisedTimeAtLocation" value="$dateadd(14:00:00)" /></AND><AND><LT name="AdvertisedTimeAtLocation" value="$dateadd(00:30:00)" /><GT name="EstimatedTimeAtLocation" value="$dateadd(-00:15:00)" /></AND></OR></AND></FILTER><INCLUDE>AdvertisedTrainIdent</INCLUDE><INCLUDE>AdvertisedTimeAtLocation</INCLUDE><INCLUDE>TrackAtLocation</INCLUDE><INCLUDE>ToLocation</INCLUDE></QUERY></REQUEST>`)
         let departuresResults = departuresData.RESPONSE.RESULT[0]
+        let stationFeature = new Feature({ geometry: new Point(fromLonLat(stationCoord)), style: new Icon({ anchor: stationCoord, src: '.data/train.png' }) }) 
+        //stationFeature.setStyle(new Style({ image: new Icon({ anchor: stationCoord, src: 'data/train.png' })}))
+        source.addFeatures([
+            stationFeature
+            //new Feature(accuracy.transform('EPSG:4326', initialMap.getView().getProjection())),
+        ]);
         $(departuresResults.TrainAnnouncement).each(function (item) {
             try {
                 departures.push(({ destination: stations[departuresResults.TrainAnnouncement[item].ToLocation[0].LocationName], number: departuresResults.TrainAnnouncement[item].AdvertisedTrainIdent, time: departuresResults.TrainAnnouncement[item].AdvertisedTimeAtLocation.substr(11, 5) }));
@@ -47,12 +58,11 @@ export async function GetNearbyStation(setStationCoord, setDepartures, coordinat
         setDepartures(departures.slice(0, 5))
     }
     else { alert("No nearby stations.") }
-    return stationData.RESPONSE.RESULT[0].TrainStation[0].Geometry.WGS84.substr(7, 36).split(/\(|\)| /)
 }
 
 
 //Referens: https://github.com/jonataswalker/ol-geocoder 
-export function AddSearchBox(map, setStationCoord, setDepartures) {
+export function AddSearchBox(map, setStationCoord, setDepartures, source) {
     var geocoder = new Geocoder('nominatim', {
         provider: 'osm',
         //key: '__some_key__', //OSM doesn't need key
@@ -65,7 +75,7 @@ export function AddSearchBox(map, setStationCoord, setDepartures) {
     });
     map.addControl(geocoder);
     //var container = document.getElementById('popup');
-    var content = document.getElementById('popup-content');
+    //var content = document.getElementById('popup-content');
     //var closer = document.getElementById('popup-closer');
 
     geocoder.on('addresschosen', function (evt) {
@@ -80,7 +90,7 @@ export function AddSearchBox(map, setStationCoord, setDepartures) {
         //content.innerHTML = '<p>Test...' + address.formatted + '</p>';
         //initialMap.setPosition(coord);
         //console.log(transform(coord, 'EPSG:3857', 'EPSG:4326'))
-        GetNearbyStation(setStationCoord, setDepartures, transform(coord, 'EPSG:3857', 'EPSG:4326'))
+        GetNearbyStation(setStationCoord, setDepartures, transform(coord, 'EPSG:3857', 'EPSG:4326'), source)
     });
 }
 
